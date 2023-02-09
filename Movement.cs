@@ -4,10 +4,11 @@ using UnityEngine;
 
 public class Movement : MonoBehaviour
 {
+    #region vars
     [SerializeField] Transform orientation;
 
     [Header("Movement")]
-    public float movespd = 6f;
+    public float movespd = 24f;
     public float movementmultiplier = 10f;
     float verticalmov;
     float horizontalmov;
@@ -38,8 +39,24 @@ public class Movement : MonoBehaviour
     [Header("Binds")]
     [SerializeField] KeyCode dashkey = KeyCode.LeftShift;
 
+    [Header("WallRunning")]
+    [SerializeField] private float wallrungrav;
+    [SerializeField] private float wallrunjumpforce;
+
+    [SerializeField] float wallDist = .5f;
+    [SerializeField] float minjump = 1.5f;
+
+    bool wallLeft = false;
+    bool wallRight = false;
+
+    RaycastHit leftwallhit;
+    RaycastHit rightwallhit;
+
     Rigidbody rb;
     RaycastHit slope;
+
+    #endregion
+    #region funcs
 
     private bool OnSlope()
     {
@@ -56,6 +73,49 @@ public class Movement : MonoBehaviour
         }
         return false;
     }
+
+    #region wallrun
+    bool canrun()
+    {
+        return !Physics.Raycast(transform.position, Vector3.down, minjump);
+    }
+
+    void wallCheck()
+    {
+        wallLeft = Physics.Raycast(transform.position, -orientation.right, out leftwallhit, wallDist);
+        wallRight = Physics.Raycast(transform.position, orientation.right, out rightwallhit, wallDist);
+    }
+
+    void wallrun() 
+    {
+        rb.useGravity = false;
+        rb.AddForce(Vector3.down * wallrungrav, ForceMode.Force);
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            if (wallLeft)
+            {
+                Vector3 wallrunjumpdirect = transform.up + leftwallhit.normal;
+                rb.velocity = new Vector3(rb.velocity.x, 0, rb.velocity.z);
+                rb.AddForce(wallrunjumpdirect * wallrunjumpforce * 100, ForceMode.Force);
+            }
+            else if (wallRight)
+            {
+                Vector3 wallrunjumpdirect = transform.up + rightwallhit.normal;
+                rb.velocity = new Vector3(rb.velocity.x, 0, rb.velocity.z);
+                rb.AddForce(wallrunjumpdirect * wallrunjumpforce * 100, ForceMode.Force);
+            }
+        }
+    }
+
+    void stopwallrun()
+    {
+        rb.useGravity = true;
+    }
+
+    #endregion
+
+    #region start/update
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -66,10 +126,27 @@ public class Movement : MonoBehaviour
     void Update()
     {
         grounded = Physics.CheckSphere(groundCheck.position, groundDist, groundMask);
+        wallCheck();
         input();
         dragcontrol();
         dash();
-        if (grounded)
+
+        if (canrun())
+        {
+            if (wallLeft | wallRight)
+            {
+                wallrun();
+            }
+            else
+            {
+                stopwallrun();
+            }
+        }
+        else
+        {
+            stopwallrun();
+        }
+        if ((grounded) | (wallLeft | wallRight))
         {
             dj = true;
             dashCounter = 3;
@@ -85,13 +162,16 @@ public class Movement : MonoBehaviour
             dj = false;
         }
     }
+    #endregion
 
+    #region movement
     void jumping()
     {
         if (grounded | dj)
         {
             rb.velocity = new Vector3(rb.velocity.x, 0, rb.velocity.z);
             rb.AddForce(transform.up * jumpForce, ForceMode.Impulse);
+            rb.AddForce(movedirection * jumpForce, ForceMode.Impulse);
         }
         
     }
@@ -111,6 +191,24 @@ public class Movement : MonoBehaviour
             cooldown = Time.time + cd;
         }
     }
+
+    private void FixedUpdate()
+    {
+        moveplayer();
+    }
+
+    void moveplayer()
+    {
+        if (grounded)
+        {
+            rb.AddForce(movedirection.normalized * movespd * movementmultiplier, ForceMode.Acceleration);
+        }
+        else if (!grounded)
+        {
+            rb.AddForce(movedirection.normalized * movespd * movementmultiplier * airmultiplier, ForceMode.Acceleration);
+        }
+    }
+    #endregion
 
     void dragcontrol()
     {
@@ -132,20 +230,6 @@ public class Movement : MonoBehaviour
         movedirection = orientation.forward * verticalmov + orientation.right * horizontalmov;
     }
 
-    private void FixedUpdate()
-    {
-        moveplayer();
-    }
-
-    void moveplayer()
-    {
-        if (grounded)
-        {
-            rb.AddForce(movedirection.normalized * movespd * movementmultiplier, ForceMode.Acceleration);
-        }
-        else if (!grounded)
-        {
-            rb.AddForce(movedirection.normalized * movespd * movementmultiplier * airmultiplier, ForceMode.Acceleration);
-        }
-    }
+    
+    #endregion
 }
