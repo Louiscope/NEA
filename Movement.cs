@@ -7,6 +7,12 @@ public class Movement : MonoBehaviour
     #region vars
     [SerializeField] Transform orientation;
 
+    [Header("Steps")]
+    [SerializeField] GameObject stepRayUpper;
+    [SerializeField] GameObject stepRayLower;
+    [SerializeField] float stepHeight = 0.3f;
+    [SerializeField] float stepSmooth = 2f;
+
     [Header("Movement")]
     public float movespd = 24f;
     public float movementmultiplier = 10f;
@@ -15,8 +21,8 @@ public class Movement : MonoBehaviour
     Vector3 movedirection;
 
     [Header("Dashing")]
-    [SerializeField] float dashspd = 80f;
-    [SerializeField] float airdashspd = 45f;
+    [SerializeField] float dashspd = 160f;
+    [SerializeField] float airdashspd = 90f;
     [SerializeField] float cd = 1f;
     [SerializeField] float cooldown = 0.15f;
     [SerializeField] float dashCounter;
@@ -118,6 +124,7 @@ public class Movement : MonoBehaviour
     #region start/update
     void Start()
     {
+        stepRayUpper.transform.position = new Vector3(stepRayUpper.transform.position.x, stepHeight, stepRayUpper.transform.position.z);
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
     }
@@ -194,6 +201,7 @@ public class Movement : MonoBehaviour
 
     private void FixedUpdate()
     {
+        stepClimb();
         moveplayer();
     }
 
@@ -206,6 +214,43 @@ public class Movement : MonoBehaviour
         else if (!grounded)
         {
             rb.AddForce(movedirection.normalized * movespd * movementmultiplier * airmultiplier, ForceMode.Acceleration);
+        }
+    }
+    #endregion
+
+    #region steps
+    void stepClimb()
+    {
+        RaycastHit hitLower;
+        if (Physics.Raycast(stepRayLower.transform.position, transform.TransformDirection(Vector3.forward), out hitLower, 0.2f))
+        {
+            RaycastHit hitUpper;
+            if (!Physics.Raycast(stepRayUpper.transform.position, transform.TransformDirection(Vector3.forward), out hitUpper, 0.4f))
+            {
+                rb.position -= new Vector3(0f, -stepSmooth * Time.deltaTime, 0f);
+            }
+        }
+
+        RaycastHit hitLower45;
+        if (Physics.Raycast(stepRayLower.transform.position, transform.TransformDirection(1.5f, 0, 1), out hitLower45, 0.2f))
+        {
+
+            RaycastHit hitUpper45;
+            if (!Physics.Raycast(stepRayUpper.transform.position, transform.TransformDirection(1.5f, 0, 1), out hitUpper45, 0.4f))
+            {
+                rb.position -= new Vector3(0f, -stepSmooth * Time.deltaTime, 0f);
+            }
+        }
+
+        RaycastHit hitLowerMinus45;
+        if (Physics.Raycast(stepRayLower.transform.position, transform.TransformDirection(-1.5f, 0, 1), out hitLowerMinus45, 0.2f))
+        {
+
+            RaycastHit hitUpperMinus45;
+            if (!Physics.Raycast(stepRayUpper.transform.position, transform.TransformDirection(-1.5f, 0, 1), out hitUpperMinus45, 0.4f))
+            {
+                rb.position -= new Vector3(0f, -stepSmooth * Time.deltaTime, 0f);
+            }
         }
     }
     #endregion

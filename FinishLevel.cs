@@ -8,6 +8,7 @@ public class FinishLevel : MonoBehaviour
     public GameObject Player;
     RandomGen rg;
     public int seed;
+    public GameObject[] Difficulties;
 
 
     void Start()
@@ -21,12 +22,19 @@ public class FinishLevel : MonoBehaviour
     }
     public void OnTriggerEnter(Collider other)
     {
-        //PlayerPos = new Vector3(Player.transform.position.x - 432, Player.transform.position.y, Player.transform.position.z - 432);
-        Player.transform.position = new Vector3(PlayerPos.x,PlayerPos.y,PlayerPos.z);
-
-        seed = System.DateTime.Now.Millisecond;
-        Random.InitState(seed);
-        rg.Gen();
+        if (other.tag == "Fin")
+        {
+            seed = System.DateTime.Now.Millisecond;
+            Destroy("Tile");
+            Random.InitState(seed);
+            rg.Gen();
+            Player.transform.position = new Vector3(PlayerPos.x, PlayerPos.y, PlayerPos.z);
+        }
+        else if (other.tag == "Difficulty")
+        {
+            Debug.Log(" hit " + other.name);
+        }
+        
     }
     public void Destroy(string tag)
     {
