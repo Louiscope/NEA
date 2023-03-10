@@ -6,14 +6,17 @@ public class FinishLevel : MonoBehaviour
 {
     public Vector3 PlayerPos;
     public GameObject Player;
-    RandomGen rg;
-    public int seed;
-    public GameObject[] Difficulties;
 
+    RandomGen rg;
+    SetDifficulty sd;
+
+    public int seed;
+    public double[] Scores = {0,0,0};
 
     void Start()
     {
         rg = GameObject.FindGameObjectWithTag("Rand").GetComponent<RandomGen>();
+        sd = GameObject.FindGameObjectWithTag("SetDiff").GetComponent<SetDifficulty>();
         
     }
     void Update()
@@ -22,19 +25,17 @@ public class FinishLevel : MonoBehaviour
     }
     public void OnTriggerEnter(Collider other)
     {
-        if (other.tag == "Fin")
+        if (other.name == "Fin")
         {
+            Scores[0] = sd.Calc(100000, 95, 0, 0);
+            Debug.Log(Scores[0]);
             seed = System.DateTime.Now.Millisecond;
             Destroy("Tile");
             Random.InitState(seed);
             rg.Gen();
             Player.transform.position = new Vector3(PlayerPos.x, PlayerPos.y, PlayerPos.z);
+
         }
-        else if (other.tag == "Difficulty")
-        {
-            Debug.Log(" hit " + other.name);
-        }
-        
     }
     public void Destroy(string tag)
     {
