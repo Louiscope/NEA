@@ -14,6 +14,8 @@ public class RandomGen : MonoBehaviour
 
     IDictionary<int, GameObject[]> tilesets = new Dictionary<int, GameObject[]>();
 
+    FinishLevel FL;
+
     public GameObject finishPrefab;
     public GameObject EnemyPrefab;
     public int gridWidth = 5;
@@ -22,19 +24,16 @@ public class RandomGen : MonoBehaviour
     public int seed = 0;
 
     void Start(){
+        FL = GameObject.FindGameObjectWithTag("Fin").GetComponent<FinishLevel>();
         tilesets.Add(1, tilesVe); tilesets.Add(2, tilesEa); tilesets.Add(3, tilesNo); tilesets.Add(4, tilesHa); tilesets.Add(5, tilesVh); tilesets.Add(6, tilesEx);
-        tiles = tilesets[Random.Range(1,6)];
         seed = System.DateTime.Now.Millisecond;
         Random.InitState(seed);
         Gen();
     }
-
-
-    public void Test(){
-        Debug.Log("Test");
-    }
  
     public void Gen(){
+        X = FL.GetDifficulty();
+        tiles = tilesets[20*(X+10)/200];
         for (int i = 0; i < gridWidth; i++){
             for (int j = 0; j < gridHeight; j++){
                 int prefabIndex = Random.Range(0, tiles.Length);

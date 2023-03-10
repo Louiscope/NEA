@@ -12,6 +12,7 @@ public class FinishLevel : MonoBehaviour
 
     public int seed;
     public double[] Scores = {0,0,0};
+    public int i = 0;
 
     void Start()
     {
@@ -27,8 +28,9 @@ public class FinishLevel : MonoBehaviour
     {
         if (other.name == "Fin")
         {
-            Scores[0] = sd.Calc(100000, 95, 0, 0);
-            Debug.Log(Scores[0]);
+            Scores[i % 3] = sd.Calc(100000, 95, 0, 0);
+            i += 1;
+            S = sd.Avg(Scores);
             seed = System.DateTime.Now.Millisecond;
             Destroy("Tile");
             Random.InitState(seed);
@@ -36,6 +38,11 @@ public class FinishLevel : MonoBehaviour
             Player.transform.position = new Vector3(PlayerPos.x, PlayerPos.y, PlayerPos.z);
 
         }
+    }
+
+    public double GetDifficulty()
+    {
+        return sd.f(S);
     }
     public void Destroy(string tag)
     {
