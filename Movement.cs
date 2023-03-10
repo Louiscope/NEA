@@ -7,12 +7,6 @@ public class Movement : MonoBehaviour
     #region vars
     [SerializeField] Transform orientation;
 
-    [Header("Steps")]
-    [SerializeField] GameObject stepRayUpper;
-    [SerializeField] GameObject stepRayLower;
-    [SerializeField] float stepHeight = 0.3f;
-    [SerializeField] float stepSmooth = 2f;
-
     [Header("Movement")]
     public float movespd = 24f;
     public float movementmultiplier = 10f;
@@ -25,6 +19,7 @@ public class Movement : MonoBehaviour
     [SerializeField] float airdashspd = 90f;
     [SerializeField] float cd = 1f;
     [SerializeField] float cooldown = 0.15f;
+    [SerializeField] float lastDash;
     [SerializeField] float dashCounter;
 
     [Header("Drag")]
@@ -40,6 +35,7 @@ public class Movement : MonoBehaviour
     float playerheight = 2f;
     float groundDist = 0.4f;
     public float jumpForce = 20f;
+    public float JumpForwardForce;
     bool dj = true;
 
     [Header("Binds")]
@@ -124,7 +120,6 @@ public class Movement : MonoBehaviour
     #region start/update
     void Start()
     {
-        stepRayUpper.transform.position = new Vector3(stepRayUpper.transform.position.x, stepHeight, stepRayUpper.transform.position.z);
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
     }
@@ -176,9 +171,17 @@ public class Movement : MonoBehaviour
     {
         if (grounded | dj)
         {
+            if (Time.time - lastDash < 1)
+            {
+                JumpForwardForce = 20f;
+            }
+            else
+            {
+                JumpForwardForce = 10f;
+            }
             rb.velocity = new Vector3(rb.velocity.x, 0, rb.velocity.z);
             rb.AddForce(transform.up * jumpForce, ForceMode.Impulse);
-            rb.AddForce(movedirection * jumpForce, ForceMode.Impulse);
+            rb.AddForce(movedirection * JumpForwardForce, ForceMode.Impulse);
         }
         
     }
@@ -196,12 +199,12 @@ public class Movement : MonoBehaviour
             }
             dashCounter -= 1;
             cooldown = Time.time + cd;
+            lastDash = Time.time;
         }
     }
 
     private void FixedUpdate()
     {
-        stepClimb();
         moveplayer();
     }
 
@@ -214,43 +217,6 @@ public class Movement : MonoBehaviour
         else if (!grounded)
         {
             rb.AddForce(movedirection.normalized * movespd * movementmultiplier * airmultiplier, ForceMode.Acceleration);
-        }
-    }
-    #endregion
-
-    #region steps
-    void stepClimb()
-    {
-        RaycastHit hitLower;
-        if (Physics.Raycast(stepRayLower.transform.position, transform.TransformDirection(Vector3.forward), out hitLower, 0.2f))
-        {
-            RaycastHit hitUpper;
-            if (!Physics.Raycast(stepRayUpper.transform.position, transform.TransformDirection(Vector3.forward), out hitUpper, 0.4f))
-            {
-                rb.position -= new Vector3(0f, -stepSmooth * Time.deltaTime, 0f);
-            }
-        }
-
-        RaycastHit hitLower45;
-        if (Physics.Raycast(stepRayLower.transform.position, transform.TransformDirection(1.5f, 0, 1), out hitLower45, 0.2f))
-        {
-
-            RaycastHit hitUpper45;
-            if (!Physics.Raycast(stepRayUpper.transform.position, transform.TransformDirection(1.5f, 0, 1), out hitUpper45, 0.4f))
-            {
-                rb.position -= new Vector3(0f, -stepSmooth * Time.deltaTime, 0f);
-            }
-        }
-
-        RaycastHit hitLowerMinus45;
-        if (Physics.Raycast(stepRayLower.transform.position, transform.TransformDirection(-1.5f, 0, 1), out hitLowerMinus45, 0.2f))
-        {
-
-            RaycastHit hitUpperMinus45;
-            if (!Physics.Raycast(stepRayUpper.transform.position, transform.TransformDirection(-1.5f, 0, 1), out hitUpperMinus45, 0.4f))
-            {
-                rb.position -= new Vector3(0f, -stepSmooth * Time.deltaTime, 0f);
-            }
         }
     }
     #endregion
