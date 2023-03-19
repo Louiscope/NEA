@@ -14,6 +14,8 @@ public class RandomGen : MonoBehaviour
     public GameObject[] tiles;
     public int DiffVal = 1;
     public bool Check = false;
+
+    // Dictionary containing keys which are the difficulty values, and the tilesets of the game
     IDictionary<int, GameObject[]> tilesets = new Dictionary<int, GameObject[]>();
 
     // Calling finishlevel.cs
@@ -52,8 +54,7 @@ public class RandomGen : MonoBehaviour
         {
             // Calculates and determines difficulty values -- Resets the counters from previous level
             X = FL.GetDifficulty();
-            FL.ResetKillCount();
-            FL.ResetSpawned();
+            FL.Reset();
         }
         tiles = tilesets[X];
         Passed = true;

@@ -11,12 +11,12 @@ public class SetDifficulty : MonoBehaviour
     {
         return Scores.Average();
     }
-    // Provides the initial weighting calculations for the difficulty
+    // Provides the initial weighting calculations for the difficulty -- Refer to documentation for more information on the difficulty system and to see the function for weighting visually
     public double Calc(double P, double T, double Den, double Dev)
     {
         return System.Math.Floor(Convert.ToDouble(10 * ((int)System.Math.Round(10 / (1 + (System.Math.Exp(-0.1 * (P / 3100) - System.Math.Min(100, (System.Math.Pow(((0.8 * T) + 100) / 90, 3.0))) - (4 * Den) - (7 * Dev))))))));
     }
-    // Reciprocal Exponential curve which gives values from 0 to 5 for difficulty which is used in RandomGen.cs
+    // Reciprocal Exponential curve which gives values from 0 to 5 for difficulty which is used in RandomGen.cs -- Refer to documentation for more information on the difficulty system and to see the function for reciprocal exponential visually
     public int f(double S)
     {
         return Convert.ToInt32((System.Math.Floor(Convert.ToDouble(10 * ((int)System.Math.Round(10 / (1 + (System.Math.Exp(-0.1 * S)))))))/20)-1);

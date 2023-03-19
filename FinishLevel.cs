@@ -20,7 +20,7 @@ public class FinishLevel : MonoBehaviour
     public int seed;
     public double[] Scores = {0,0,0};
 
-    // Values used for placing the finish tile upon X deaths
+    // Values used for placing the finish tile upon n kills on enemies -- Refer to documentation for information about the objectives of the game
     public GameObject FinishPrefab;
     Vector3 FinishPos = new Vector3(432f, 1, 432f);
     public bool Spawned = false;
@@ -37,7 +37,6 @@ public class FinishLevel : MonoBehaviour
         DeathEnvironment = 0;
         rg = GameObject.FindGameObjectWithTag("Rand").GetComponent<RandomGen>();
         sd = GameObject.FindGameObjectWithTag("SetDiff").GetComponent<SetDifficulty>();
-        
     }
     // Finds current player position for spawning
     void Update()
@@ -53,7 +52,6 @@ public class FinishLevel : MonoBehaviour
     public void SetScores(int val)
     {
         Scores[0] = val * 20; Scores[1] = val * 20; Scores[2] = val * 20;
-        Debug.Log(sd.avg(Scores));
     }
     // Spawns the finish tile
     void SpawnFinish()
@@ -66,14 +64,10 @@ public class FinishLevel : MonoBehaviour
     {
         EnemyKillCount++;
     }
-    // Resets the kill count back to 0, called in RandomGen.cs
-    public void ResetKillCount()
+    // Resets the kill count back to 0 and the bool checker for the finish tile to false, called in RandomGen.cs
+    public void Reset()
     {
         EnemyKillCount = 0;
-    }
-    // Resets the bool of spawned once new level begins, called in RandomGen.cs
-    public void ResetSpawned()
-    {
         Spawned = false;
     }
     // Once the player enters a trigger (The finish tile)
@@ -82,21 +76,24 @@ public class FinishLevel : MonoBehaviour
         // Checks that the trigger is the finish
         if (other.tag == "Fin")
         {
-            // Applies calculation with values and stores to current Scores location -- Destroys the tiles and then regenerates with the next tileset based upon difficulty
+            // Applies calculation with values and stores to current Scores location between 0 and 2
             Scores[i % 3] = sd.Calc(Points, Time.time - StartTime, DeathEnemy, DeathEnvironment);
             i++;
             S = sd.avg(Scores);
+            // Sets new start time from the time the last level was completed
             StartTime = Time.time;
+            // Sets a new seed for the random generation, as it is milliseconds there is an infinitesmal chance it is the same as another if there were infinite tiles
             seed = System.DateTime.Now.Millisecond;
             Destroy("Tile");
-            GameObject.Destroy(other);
+            // Moves player to start position
             Player.transform.position = new Vector3(PlayerPos.x, PlayerPos.y, PlayerPos.z);
+            // Set up and calling of Gen in RandomGem.cs
             Random.InitState(seed);
             rg.Gen();
         }
     }
     
-    // Uses the Exponential calculation found in SetDifficulty.cs for RandomGen.cs to use in the tilesets selection
+    // Uses the Reciprocal Exponential calculation found in SetDifficulty.cs for RandomGen.cs to use in the tilesets selection -- Refer to documentation for more information on the difficulty system
     public int GetDifficulty()
     {
         return sd.f(S);
@@ -115,11 +112,10 @@ public class FinishLevel : MonoBehaviour
         }
         Player.transform.position = new Vector3(StartPos.x, 1, StartPos.z);
     }
-    // Increases points by 5000 until 100000 which is the cap
+    // Increases points by 5000 until 100000 which is the cap -- Refer to the documentation for information on the points system
     public void AddPoints()
     {
         Points += 5000;
-        Debug.Log(Points);
         if (Points > 100000)
         {
             Points = 100000;
