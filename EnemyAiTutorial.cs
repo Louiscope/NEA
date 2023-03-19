@@ -26,6 +26,12 @@ public class EnemyAiTutorial : MonoBehaviour
     public float sightRange, attackRange;
     public bool playerInSightRange, playerInAttackRange;
 
+    FinishLevel FL;
+    void Start()
+    {
+        FL = GameObject.FindGameObjectWithTag("Fin").GetComponent<FinishLevel>();
+    }
+
     private void Awake()
     {
         player = GameObject.Find("Player").transform;
@@ -85,7 +91,8 @@ public class EnemyAiTutorial : MonoBehaviour
             ///Attack code here
             Rigidbody rb = Instantiate(projectile, transform.position, Quaternion.identity).GetComponent<Rigidbody>();
             rb.AddForce(transform.forward * 32f, ForceMode.Impulse);
-            rb.AddForce(transform.up * 8f, ForceMode.Impulse);
+            rb.AddForce(transform.up * 6f, ForceMode.Impulse);
+            Destroy(rb, 3);
             ///End of attack code
 
             alreadyAttacked = true;
@@ -96,12 +103,24 @@ public class EnemyAiTutorial : MonoBehaviour
     {
         alreadyAttacked = false;
     }
-
+    public void OnTriggerEnter(Collider other)
+    {
+        if ((other.tag != "Projectile") & (other.tag != "Fin") & (other.tag != "Spike"))
+        {
+            TakeDamage(5);
+        }
+            
+    }
     public void TakeDamage(int damage)
     {
         health -= damage;
 
-        if (health <= 0) Invoke(nameof(DestroyEnemy), 0.5f);
+        if (health <= 0)
+        {
+            Destroy(gameObject);
+            FL.AddPoints();
+            FL.AddKillCount();
+        }
     }
     private void DestroyEnemy()
     {

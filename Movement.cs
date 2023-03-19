@@ -2,11 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// THIS IS TUTORIAL CODE -- THIS IS NOT MY CODE APART FROM DOUBLEJUMP
 public class Movement : MonoBehaviour
 {
-    #region vars
+    // Used for finding direction of player
     [SerializeField] Transform orientation;
 
+    // Contains speed, multiplier and directional values
     [Header("Movement")]
     public float movespd = 24f;
     public float movementmultiplier = 10f;
@@ -14,6 +16,7 @@ public class Movement : MonoBehaviour
     float horizontalmov;
     Vector3 movedirection;
 
+    // Contains dash information (Cooldowns, force, counters)
     [Header("Dashing")]
     [SerializeField] float dashspd = 160f;
     [SerializeField] float airdashspd = 90f;
@@ -22,12 +25,14 @@ public class Movement : MonoBehaviour
     [SerializeField] float lastDash;
     [SerializeField] float dashCounter;
 
+    // Contains drag values for the rigidbody physics to interact with
     [Header("Drag")]
     public float grnddrag = 6f;
     public float airdrag = 2f;
     public float dashdrag = 6f;
     [SerializeField] float airmultiplier = 0.4f;
 
+    // Contains jump information (GroundChecker, jump height, double jump)
     [Header("Jumping")]
     [SerializeField] LayerMask groundMask;
     [SerializeField] Transform groundCheck;
@@ -41,25 +46,21 @@ public class Movement : MonoBehaviour
     [Header("Binds")]
     [SerializeField] KeyCode dashkey = KeyCode.LeftShift;
 
+    // Contains wallrunning info (Location of wall relative to player etc.)
     [Header("WallRunning")]
     [SerializeField] private float wallrungrav;
     [SerializeField] private float wallrunjumpforce;
-
     [SerializeField] float wallDist = .5f;
     [SerializeField] float minjump = 1.5f;
-
     bool wallLeft = false;
     bool wallRight = false;
-
     RaycastHit leftwallhit;
     RaycastHit rightwallhit;
 
     Rigidbody rb;
     RaycastHit slope;
 
-    #endregion
-    #region funcs
-
+    // Determines slope function
     private bool OnSlope()
     {
         if (Physics.Raycast(transform.position, Vector3.down, out slope, playerheight / 2 + 0.5f))
@@ -76,18 +77,19 @@ public class Movement : MonoBehaviour
         return false;
     }
 
-    #region wallrun
     bool canrun()
     {
         return !Physics.Raycast(transform.position, Vector3.down, minjump);
     }
 
+    // Checks location of wall and returns bool if it is wallDist away from player
     void wallCheck()
     {
         wallLeft = Physics.Raycast(transform.position, -orientation.right, out leftwallhit, wallDist);
         wallRight = Physics.Raycast(transform.position, orientation.right, out rightwallhit, wallDist);
     }
 
+    // Chenges player state for wallrunning
     void wallrun() 
     {
         rb.useGravity = false;
@@ -115,16 +117,14 @@ public class Movement : MonoBehaviour
         rb.useGravity = true;
     }
 
-    #endregion
-
-    #region start/update
+    // Collects rigidbody from player object -- Prevents player object from spinning
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
     }
 
-    // Update is called once per frame
+    // Checkers for walls and ground -- Controls double jump, dash and wallrun operations actively
     void Update()
     {
         grounded = Physics.CheckSphere(groundCheck.position, groundDist, groundMask);
@@ -164,9 +164,8 @@ public class Movement : MonoBehaviour
             dj = false;
         }
     }
-    #endregion
-
-    #region movement
+   
+    // Controls jumping
     void jumping()
     {
         if (grounded | dj)
@@ -185,6 +184,7 @@ public class Movement : MonoBehaviour
         }
         
     }
+    // Controls dashing
     void dash()
     {
         if (Input.GetKey(dashkey) && (dashCounter != 0) && Time.time > cooldown)
@@ -203,11 +203,13 @@ public class Movement : MonoBehaviour
         }
     }
 
+    // Fixed update used so that player moves in time with physics engine
     private void FixedUpdate()
     {
         moveplayer();
     }
 
+    // Moves player dependent on input
     void moveplayer()
     {
         if (grounded)
@@ -219,8 +221,8 @@ public class Movement : MonoBehaviour
             rb.AddForce(movedirection.normalized * movespd * movementmultiplier * airmultiplier, ForceMode.Acceleration);
         }
     }
-    #endregion
 
+    // Controls slowing effect of player while on ground or midair
     void dragcontrol()
     {
         if (grounded)
@@ -233,6 +235,7 @@ public class Movement : MonoBehaviour
         }
     }
 
+    // Collects inputs
     public void input()
     {
         horizontalmov = Input.GetAxisRaw("Horizontal");
@@ -241,6 +244,4 @@ public class Movement : MonoBehaviour
         movedirection = orientation.forward * verticalmov + orientation.right * horizontalmov;
     }
 
-    
-    #endregion
 }
