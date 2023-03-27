@@ -12,12 +12,14 @@ public class RandomGen : MonoBehaviour
     public GameObject[] tilesVh;
     public GameObject[] tilesEx;
     public GameObject[] tiles;
+    public GameObject[] downTiles;
     public int DiffVal = 1;
     public bool Check = false;
 
     // Dictionary containing keys which are the difficulty values, and the tilesets of the game
     IDictionary<int, GameObject[]> tilesets = new Dictionary<int, GameObject[]>();
-    
+
+    // Calling finishlevel.cs
     FinishLevel FL;
 
     // Contains values for how the level in generated
@@ -51,24 +53,34 @@ public class RandomGen : MonoBehaviour
         // Checks if the level has already been completed with Passed
         if (Passed)
         {
+            // Calculates and determines difficulty values -- Resets the counters from previous level
             X = FL.GetDifficulty();
             FL.Reset();
         }
         tiles = tilesets[X];
         Passed = true;
-
+        
+        // Nested iteration to apply the multidirectional generation horizontally and vertically when looked at top down
         for (int i = 0; i < gridWidth; i++){
             for (int j = 0; j < gridHeight; j++){
-            
                 // Picks a random tile from the current tileset
-                int prefabIndex = Random.Range(0, tiles.Length);
+                int prefabIndex = UnityEngine.Random.Range(0, tiles.Length);
+                if ((prefabIndex == 2) && (FL.GetPrevDeaths() > 2) && (X > 0))
+                {
+                    downTiles = tilesets[X - 1];
+                    tiles[prefabIndex] = downTiles[prefabIndex];
+                }
                 GameObject chosenPrefab = tiles[prefabIndex];
+                
 
+                // Determines location of tiles in the grid
                 Vector3 tilePos = new Vector3(i * tileGap,0, j * tileGap);
 
+                // Checks to see if first tile -- Generates a predetermined start room with no enemies
                 if ((i == 0) & (j == 0)){
                     GameObject starttile = Instantiate(StartPrefab, tilePos, Quaternion.identity);
                 }
+                // otherwise generates normally with the random tile
                 else
                 {
                     GameObject tile = Instantiate(chosenPrefab, tilePos, Quaternion.identity);

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 
 public class FinishLevel : MonoBehaviour
@@ -16,6 +17,8 @@ public class FinishLevel : MonoBehaviour
     public float StartTime;
     public int DeathEnemy;
     public int DeathEnvironment;
+    public int PrevDeathEnvironment = 0;
+    public int PrevDeathEnemy = 0;
     public int EnemyKillCount = 0;
     public int seed;
     public double[] Scores = {0,0,0};
@@ -67,8 +70,17 @@ public class FinishLevel : MonoBehaviour
     // Resets the kill count back to 0 and the bool checker for the finish tile to false, called in RandomGen.cs
     public void Reset()
     {
+        PrevDeathEnvironment = DeathEnvironment;
+        PrevDeathEnemy = DeathEnemy;
+        DeathEnemy = 0;
+        DeathEnvironment = 0;
         EnemyKillCount = 0;
         Spawned = false;
+    }
+
+    public int GetPrevDeaths()
+    {
+        return Math.Max(PrevDeathEnemy, PrevDeathEnvironment);
     }
     // Once the player enters a trigger (The finish tile)
     public void OnTriggerEnter(Collider other)
@@ -88,7 +100,7 @@ public class FinishLevel : MonoBehaviour
             // Moves player to start position
             Player.transform.position = new Vector3(PlayerPos.x, PlayerPos.y, PlayerPos.z);
             // Set up and calling of Gen in RandomGem.cs
-            Random.InitState(seed);
+            UnityEngine.Random.InitState(seed);
             rg.Gen();
         }
     }

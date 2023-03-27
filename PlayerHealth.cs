@@ -16,10 +16,29 @@ public class PlayerHealth : MonoBehaviour
     }
 
     // Checker for when the player enters a trigger -- Finds the tag and determines damage done and damage type -- When health reaches 0 due to damage type, death counter is increase from FinishLevel.cs
-    public void OnTriggerEnter(Collider other)
+    public void OnCollisionEnter(Collision other)
     {
-        if (other.tag == "Projectile")
+        if (other.gameObject.tag == "Projectile")
         {
+            RecieveDamage(true, other.gameObject);
+        }
+        else if (other.gameObject.tag == "Spike")
+        {
+            RecieveDamage(false, other.gameObject);
+        }
+    }
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.tag == "DeathBox")
+        {
+            FL.AddDeath(false);
+        }
+    }
+    void RecieveDamage(bool DmgType, GameObject other)
+    {
+        if (DmgType)
+        {
+            Destroy(other.gameObject);
             health -= EnemyDamage;
             if (health <= 0)
             {
@@ -27,7 +46,7 @@ public class PlayerHealth : MonoBehaviour
                 health = 5;
             }
         }
-        else if (other.tag == "Spike")
+        else
         {
             health -= SpikeDamage;
             if (health <= 0)

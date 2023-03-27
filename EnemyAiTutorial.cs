@@ -6,6 +6,8 @@ public class EnemyAiTutorial : MonoBehaviour
 {
     public NavMeshAgent agent;
 
+    public GameObject FiredProjectile;
+
     public Transform player;
 
     public LayerMask whatIsGround, whatIsPlayer;
@@ -89,10 +91,13 @@ public class EnemyAiTutorial : MonoBehaviour
         if (!alreadyAttacked)
         {
             ///Attack code here
-            Rigidbody rb = Instantiate(projectile, transform.position, Quaternion.identity).GetComponent<Rigidbody>();
+            FiredProjectile = Instantiate(projectile, transform.position, Quaternion.identity);
+            Rigidbody rb = FiredProjectile.GetComponent<Rigidbody>();
+            Physics.IgnoreCollision(FiredProjectile.GetComponent<Collider>(),GetComponent<Collider>());
+            rb.useGravity = false;
             rb.AddForce(transform.forward * 32f, ForceMode.Impulse);
             rb.AddForce(transform.up * 6f, ForceMode.Impulse);
-            Destroy(rb, 3);
+            Destroy(FiredProjectile, 3);
             ///End of attack code
 
             alreadyAttacked = true;
@@ -103,14 +108,7 @@ public class EnemyAiTutorial : MonoBehaviour
     {
         alreadyAttacked = false;
     }
-    public void OnTriggerEnter(Collider other)
-    {
-        if ((other.tag != "Projectile") & (other.tag != "Fin") & (other.tag != "Spike"))
-        {
-            TakeDamage(5);
-        }
-            
-    }
+
     public void TakeDamage(int damage)
     {
         health -= damage;
