@@ -27,6 +27,7 @@ public class PlayerHealth : MonoBehaviour
             RecieveDamage(false, other.gameObject);
         }
     }
+    // Deathbox in case you fall out of map
     void OnTriggerEnter(Collider other)
     {
         if (other.tag == "DeathBox")
