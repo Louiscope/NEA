@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class ProjectileCollisions : MonoBehaviour
 {
+    // Checks for enemy projectiles
     void OnCollisionEnter(Collision collider)
     {
         if (collider.gameObject.tag != "Enemy")
