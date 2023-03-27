@@ -90,7 +90,7 @@ public class EnemyAiTutorial : MonoBehaviour
 
         if (!alreadyAttacked)
         {
-            ///Attack code here
+            ///Attack code
             FiredProjectile = Instantiate(projectile, transform.position, Quaternion.identity);
             Rigidbody rb = FiredProjectile.GetComponent<Rigidbody>();
             Physics.IgnoreCollision(FiredProjectile.GetComponent<Collider>(),GetComponent<Collider>());
